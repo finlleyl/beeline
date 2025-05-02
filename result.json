@@ -1,0 +1,378 @@
+[
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope",
+        "name": "RequestScope",
+        "type": "class",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [
+            "injector.Scope"
+        ],
+        "relations": {
+            "methods": [
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.configure",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.enter",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.exit",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.__enter__",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.__exit__",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.get"
+            ],
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.configure",
+        "name": "configure",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "local"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.enter",
+        "name": "enter",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "hasattr",
+                "setattr"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.exit",
+        "name": "exit",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "items",
+                "getattr",
+                "close",
+                "get",
+                "delattr",
+                "repr",
+                "delattr"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.__enter__",
+        "name": "__enter__",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "enter"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.__exit__",
+        "name": "__exit__",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "exit"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RequestScope.get",
+        "name": "get",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "getattr",
+                "repr",
+                "InstanceProvider",
+                "get",
+                "setattr",
+                "repr",
+                "getattr",
+                "Exception"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Db",
+        "name": "Db",
+        "type": "class",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [
+            "injector.Module"
+        ],
+        "relations": {
+            "methods": [
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Db.__init__",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Db.connection",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Db.session"
+            ],
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Db.__init__",
+        "name": "__init__",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Db.connection",
+        "name": "connection",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "connect"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Db.session",
+        "name": "session",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "Session"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RedisMod",
+        "name": "RedisMod",
+        "type": "class",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [
+            "injector.Module"
+        ],
+        "relations": {
+            "methods": [
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RedisMod.__init__",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RedisMod.configure",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RedisMod.lock"
+            ],
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RedisMod.__init__",
+        "name": "__init__",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RedisMod.configure",
+        "name": "configure",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "bind",
+                "Redis"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::RedisMod.lock",
+        "name": "lock",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::create_lock",
+        "name": "create_lock",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "RedisLock"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Rq",
+        "name": "Rq",
+        "type": "class",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [
+            "injector.Module"
+        ],
+        "relations": {
+            "methods": [
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Rq.queue",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Rq.run_async_handler"
+            ],
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Rq.queue",
+        "name": "queue",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "Queue"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Rq.run_async_handler",
+        "name": "run_async_handler",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::enqueue_after_commit",
+        "name": "enqueue_after_commit",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "sqlalchemy_event.listens_for(connection, 'commit')",
+                "listens_for",
+                "enqueue"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::EventBusMod",
+        "name": "EventBusMod",
+        "type": "class",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [
+            "injector.Module"
+        ],
+        "relations": {
+            "methods": [
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::EventBusMod.event_bus"
+            ],
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::EventBusMod.event_bus",
+        "name": "event_bus",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "InjectorEventBus"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Configs",
+        "name": "Configs",
+        "type": "class",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [
+            "injector.Module"
+        ],
+        "relations": {
+            "methods": [
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Configs.__init__",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Configs.customer_relationship_config",
+                "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Configs.payments_config"
+            ],
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Configs.__init__",
+        "name": "__init__",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Configs.customer_relationship_config",
+        "name": "customer_relationship_config",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "CustomerRelationshipConfig",
+                "int"
+            ],
+            "called_by": []
+        }
+    },
+    {
+        "id": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py::Configs.payments_config",
+        "name": "payments_config",
+        "type": "function",
+        "file": "file:///home/finleyl/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B/beeline/beeline/foo.py",
+        "inherits": [],
+        "relations": {
+            "calls": [
+                "PaymentsConfig"
+            ],
+            "called_by": []
+        }
+    }
+]
