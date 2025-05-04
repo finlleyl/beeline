@@ -159,12 +159,45 @@ class RepoDocSidebarProvider {
                     headers: { 'Content-Type': 'application/zip' },
                     responseType: 'arraybuffer' // Изменено на arraybuffer для получения ZIP
                 });
+                console.log('Получен ответ от сервера:', {
+                    status: resp.status,
+                    headers: resp.headers,
+                    dataLength: resp.data.byteLength
+                });
                 // Распаковываем полученный ZIP
                 const receivedZip = yield jszip_1.default.loadAsync(resp.data);
-                // Изменяем путь к файлу project_overview.md
-                const overviewFile = receivedZip.file('content/generated_docs/auctioning_platform/project_overview.md');
+                // Создаём/получаем output channel
+                const outputChannel = vscode.window.createOutputChannel('Repo Doc Generator');
+                // Выводим список всех файлов в ZIP
+                outputChannel.appendLine('Содержимое полученного ZIP архива:');
+                receivedZip.forEach((relativePath, entry) => {
+                    outputChannel.appendLine(`- ${relativePath} (${entry.name})`);
+                });
+                // Показываем панель
+                // outputChannel.show();
+                // Пробуем найти файл разными способами
+                let directPath = '';
+                Object.keys(receivedZip.files).forEach(filePath => {
+                    if (filePath.endsWith('project_overview.md')) {
+                        directPath = filePath;
+                    }
+                });
+                if (!directPath) {
+                    this._view.webview.postMessage({
+                        status: 'Ошибка',
+                        data: '<p style="color: red;">Файл project_overview.md не найден в ZIP архиве</p>'
+                    });
+                    return;
+                }
+                const overviewFile = receivedZip.file(directPath);
+                console.log('Поиск файла:', {
+                    directPathExists: !!overviewFile,
+                    totalFiles: Object.keys(receivedZip.files).length,
+                    filesWithMd: Object.keys(receivedZip.files).filter(f => f.endsWith('.md'))
+                });
                 if (overviewFile) {
                     const content = yield overviewFile.async('string');
+                    console.log('Содержимое файла (первые 100 символов):', content.substring(0, 100));
                     // Конвертируем Markdown в HTML (простая замена)
                     const htmlContent = content
                         .replace(/\n/g, '<br>')
