@@ -69,56 +69,71 @@ class RepoDocSidebarProvider {
         return `<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8"/>
-  <style>
-    body, html { margin: 0; padding: 0; height: 100%; }
-    .form-container {
-      display: flex; justify-content: center; align-items: center;
-      height: 100vh;
-      flex-direction: column;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
-      border: none; color: #fff;
-      padding: 0.8em 2em; font-size: 1rem; font-weight: 600;
-      border-radius: 2.5em;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    }
-    .btn-primary:active {
-      transform: translateY(0);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-    }
-    #status {
-      margin-top: 1em;
-      font-style: italic;
-    }
-  </style>
+    <meta charset="UTF-8"/>
+    <style>
+        body, html { margin: 0; padding: 10px; height: 100%; }
+        .form-container {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
+            border: none; color: #fff;
+            padding: 0.8em 2em; font-size: 1rem; font-weight: 600;
+            border-radius: 2.5em;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+        }
+        #status {
+            margin-top: 1em;
+            font-style: italic;
+        }
+        #result {
+            margin-top: 20px;
+            max-width: 100%;
+            overflow-y: auto;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="form-container">
-    <button id="analyzeBtn" class="btn-primary">Анализ</button>
-    <div id="status"></div>
-  </div>
-  <script>
-    const vscode = acquireVsCodeApi();
-    const btn = document.getElementById('analyzeBtn');
-    const status = document.getElementById('status');
-    btn.addEventListener('click', () => {
-      status.textContent = 'Запрос отправлен...';
-      vscode.postMessage({ command: 'analyze' });
-    });
-    window.addEventListener('message', event => {
-      if (event.data.status) {
-        status.textContent = event.data.status;
-      }
-    });
-  </script>
+    <div class="form-container">
+        <button id="analyzeBtn" class="btn-primary">Анализ</button>
+        <div id="status"></div>
+        <div id="result"></div>
+    </div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        const btn = document.getElementById('analyzeBtn');
+        const status = document.getElementById('status');
+        const result = document.getElementById('result');
+        
+        btn.addEventListener('click', () => {
+            status.textContent = 'Запрос отправлен...';
+            result.innerHTML = '';
+            vscode.postMessage({ command: 'analyze' });
+        });
+        
+        window.addEventListener('message', event => {
+            if (event.data.status) {
+                status.textContent = event.data.status;
+            }
+            if (event.data.data) {
+                result.innerHTML = event.data.data;
+            }
+        });
+    </script>
 </body>
 </html>`;
     }
@@ -144,18 +159,19 @@ class RepoDocSidebarProvider {
                     headers: { 'Content-Type': 'application/zip' },
                     responseType: 'json' // ожидаем JSON с путём
                 });
-                this._view.webview.postMessage({ status: 'Анализ завершён.', data: resp.data });
-                const panel = vscode.window.createWebviewPanel('repoDocsResult', 'Документация репозитория', vscode.ViewColumn.One, {});
-                panel.webview.html = resp.data;
+                this._view.webview.postMessage({
+                    status: 'Анализ завершён',
+                    data: resp.data
+                });
             }
             catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
-                this._view.webview.postMessage({ status: 'Ошибка: ' + errorMessage });
+                this._view.webview.postMessage({
+                    status: 'Ошибка: ' + errorMessage,
+                    data: '<p style="color: red;">Произошла ошибка при обработке запроса</p>'
+                });
             }
         });
-    }
-    catch(e) {
-        vscode.window.showErrorMessage(`Ошибка: ${e.message}`);
     }
 }
 // Рекурсивная функция архивации папок
