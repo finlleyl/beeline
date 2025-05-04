@@ -46,6 +46,30 @@ function activate(context) {
     // Регистрируем провайдер для WebviewView с id 'repoDocView'
     const disposable = vscode.window.registerWebviewViewProvider('repoDocView', provider);
     context.subscriptions.push(disposable);
+    // Регистрируем команду для показа документации модуля
+    let showModuleDoc = vscode.commands.registerCommand('repoDoc.showModuleDoc', (folder) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Находим имя и путь самой папки
+            const folderPath = folder.fsPath;
+            const folderName = path.basename(folderPath);
+            // Формируем путь к файлу документации - в той же папке
+            const docFilePath = vscode.Uri.file(path.join(folderPath, `${folderName}_module.md`));
+            try {
+                // Проверяем существование файла
+                yield fs.promises.access(docFilePath.fsPath);
+                // Открываем файл в редакторе
+                const doc = yield vscode.workspace.openTextDocument(docFilePath);
+                yield vscode.window.showTextDocument(doc);
+            }
+            catch (error) {
+                vscode.window.showErrorMessage(`Документация для модуля ${folderName} не найдена (${folderName}.md)`);
+            }
+        }
+        catch (error) {
+            vscode.window.showErrorMessage('Ошибка при открытии документации модуля');
+        }
+    }));
+    context.subscriptions.push(showModuleDoc);
 }
 exports.activate = activate;
 class RepoDocSidebarProvider {
