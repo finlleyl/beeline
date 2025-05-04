@@ -10,6 +10,28 @@ export function activate(context: vscode.ExtensionContext) {
 	const disposable = (vscode.window as any).registerWebviewViewProvider('repoDocView', provider);
 	context.subscriptions.push(disposable);
 
+	// Добавляем хранение состояния
+	let isDocumentationEnabled = context.globalState.get('isDocumentationEnabled', true);
+
+	// Создаем команду для переключения состояния
+	let toggleDoc = vscode.commands.registerCommand('repoDoc.toggleDocumentation', () => {
+		isDocumentationEnabled = !isDocumentationEnabled;
+		context.globalState.update('isDocumentationEnabled', isDocumentationEnabled);
+
+		// Обновляем иконку
+		const icon = isDocumentationEnabled ? '$(eye)' : '$(eye-closed)';
+		const status = isDocumentationEnabled ? 'включен' : 'выключен';
+		vscode.commands.executeCommand('setContext', 'repoDoc.documentationEnabled', isDocumentationEnabled);
+		vscode.window.showInformationMessage(`Автопоказ документации ${status}`);
+
+		// Обновляем текущий файл
+		if (vscode.window.activeTextEditor) {
+			updateDocumentation(vscode.window.activeTextEditor);
+		}
+	});
+
+	context.subscriptions.push(toggleDoc);
+
 	// Регистрируем команду для показа документации модуля
 	let showModuleDoc = vscode.commands.registerCommand(
 		'repoDoc.showModuleDoc',
@@ -127,7 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
 			.replace(/^(.+)$/gm, '$1<br>');
 	}
 
-	// Создаем декоратор с улучшенными стилями
+	// Создаем декоратор с улучшенными стилями для читаемости
 	const decorationType = vscode.window.createTextEditorDecorationType({
 		isWholeLine: true,
 		before: {
@@ -135,80 +157,125 @@ export function activate(context: vscode.ExtensionContext) {
 			backgroundColor: new vscode.ThemeColor('editor.background'),
 			color: new vscode.ThemeColor('editor.foreground'),
 			fontStyle: 'normal',
-			margin: '1em 0',
-			width: '100%',
-			height: 'auto'
+			margin: '2em 0',
+			textDecoration: 'none; white-space: pre-wrap; word-wrap: break-word'
 		}
 	});
 
+	// Улучшенный форматер markdown
+	function formatMarkdownContent(content: string): string {
+		// Добавляем отступы для лучшей читаемости
+		const result = content
+			.split('\n')
+			.map(line => {
+				// Обработка заголовков
+				if (line.startsWith('#')) {
+					const matches = line.match(/^#+/);
+					const level = matches ? matches[0].length : 1;
+					return `\n${line}\n`;
+				}
+				// Обработка списков
+				if (line.match(/^[-*+]\s/)) {
+					return `  ${line}\n`;
+				}
+				// Пустые строки
+				if (line.trim() === '') {
+					return '\n';
+				}
+				// Обычный текст с переносом
+				return `${line}\n`;
+			})
+			.join('')
+			// Удаляем лишние переносы строк
+			.replace(/\n{3,}/g, '\n\n');
+
+		return result;
+	}
+
 	// Функция для обновления документации
 	async function updateDocumentation(editor: vscode.TextEditor) {
+		if (!isDocumentationEnabled) {
+			return; // Если документация выключена, просто выходим
+		}
+
 		try {
-			// 1. Путь к открытому файлу и корню рабочего пространства
 			const filePath = editor.document.uri.fsPath;
 			const workspaceFolders = vscode.workspace.workspaceFolders;
 			if (!workspaceFolders || workspaceFolders.length === 0) {
-				vscode.window.showErrorMessage('Нет открытого рабочего пространства');
 				return;
 			}
 			const workspaceRoot = workspaceFolders[0].uri.fsPath;
-
-			// 2. Директория и базовое имя файла
 			const fileDir = path.dirname(filePath);
 			const fileName = path.basename(filePath);
 			const baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-
-			// 3. Относительный путь от корня до папки с файлом
 			const relDir = path.relative(workspaceRoot, fileDir);
+			const docPath = path.join(workspaceRoot, '.vscode-temp', 'content', 'generated_docs', relDir, `${baseName}.md`);
 
-			// 4. Формируем путь в .vscode-temp/content/generated_docs
-			const docDir = path.join(
-				workspaceRoot,
-				'.vscode-temp',
-				'content',
-				'generated_docs',
-				relDir
-			);
-			const docPath = path.join(docDir, `${baseName}.md`);
-
-			// 5. Проверяем существование и читаем содержимое
 			if (fs.existsSync(docPath)) {
 				const docContent = await fs.promises.readFile(docPath, 'utf-8');
+				const formattedContent = formatMarkdownContent(docContent);
 
-				const decoration: vscode.DecorationOptions = {
-					range: new vscode.Range(0, 0, 0, 0),
-					renderOptions: {
-						before: {
-							contentText: docContent,
-							backgroundColor: new vscode.ThemeColor('editor.background'),
-							color: new vscode.ThemeColor('editor.foreground'),
-							fontStyle: 'normal',
-							margin: '1em 0'
-						}
+				// Создаем новую веб-панель для документации
+				const panel = vscode.window.createWebviewPanel(
+					'fileDocumentation',
+					`Документация: ${baseName}`,
+					vscode.ViewColumn.Beside,
+					{
+						enableScripts: true,
+						retainContextWhenHidden: true
 					}
-				};
+				);
 
-				editor.setDecorations(decorationType, [decoration]);
-			} else {
-				editor.setDecorations(decorationType, []);
+				panel.webview.html = `<!DOCTYPE html>
+				<html>
+				<head>
+					<meta charset="UTF-8">
+					<style>
+						body {
+							font-family: var(--vscode-editor-font-family);
+							font-size: var(--vscode-editor-font-size);
+							line-height: 1.6;
+							padding: 20px;
+							color: var(--vscode-editor-foreground);
+							background: var(--vscode-editor-background);
+						}
+						pre {
+							background: var(--vscode-textBlockQuote-background);
+							padding: 1em;
+							border-radius: 4px;
+							overflow-x: auto;
+						}
+						code {
+							font-family: var(--vscode-editor-font-family);
+						}
+						blockquote {
+							border-left: 3px solid var(--vscode-textBlockQuote-border);
+							margin: 0;
+							padding-left: 1em;
+							color: var(--vscode-textBlockQuote-foreground);
+						}
+					</style>
+				</head>
+				<body>
+					${formattedContent.split('\n').map(line => `<div>${line}</div>`).join('')}
+				</body>
+				</html>`;
 			}
 		} catch (error) {
 			console.error('Error updating documentation:', error);
-			vscode.window.showErrorMessage('Ошибка при обновлении документации');
 		}
 	}
 
-	// Слушаем открытие и изменение активного редактора
+	// Обновляем обработчики событий
 	context.subscriptions.push(
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			if (editor) {
-				console.log('Editor changed:', editor.document.uri.fsPath);
 				updateDocumentation(editor);
 			}
 		})
 	);
 
-	// Обновляем документацию для уже открытого редактора
+	// Показываем документацию для текущего файла при запуске
 	if (vscode.window.activeTextEditor) {
 		updateDocumentation(vscode.window.activeTextEditor);
 	}
@@ -276,6 +343,19 @@ class RepoDocSidebarProvider {
             overflow-y: auto;
             padding: 10px;
         }
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 5px 10px;
+            background: var(--vscode-statusBar-background);
+            color: var(--vscode-statusBar-foreground);
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -284,11 +364,15 @@ class RepoDocSidebarProvider {
         <div id="status"></div>
         <div id="result"></div>
     </div>
+    <div class="status-bar">
+        <span id="docStatus">Автопоказ документации включен</span>
+    </div>
     <script>
         const vscode = acquireVsCodeApi();
         const btn = document.getElementById('analyzeBtn');
         const status = document.getElementById('status');
         const result = document.getElementById('result');
+        const docStatus = document.getElementById('docStatus');
         
         btn.addEventListener('click', () => {
             status.textContent = 'Запрос отправлен...';
@@ -302,6 +386,10 @@ class RepoDocSidebarProvider {
             }
             if (event.data.data) {
                 result.innerHTML = event.data.data;
+            }
+            if (event.data.docEnabled !== undefined) {
+                docStatus.textContent = 'Автопоказ документации ' + 
+                    (event.data.docEnabled ? 'включен' : 'выключен');
             }
         });
     </script>
