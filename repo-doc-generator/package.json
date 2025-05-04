@@ -36,15 +36,16 @@
         "commands": [
             {
                 "command": "repoDoc.showModuleDoc",
-                "title": "Показать документацию модуля"
+                "title": "Показать документацию модуля",
+                "category": "Repository Docs"
             }
         ],
         "menus": {
             "explorer/context": [
                 {
-                    "when": "explorerResourceIsFolder && !resourcePath =~ /\\.vscode-temp/",
+                    "when": "explorerResourceIsFolder && !resourcePath =~ /\\.vscode-temp/ && explorerResourceRoot =~ /\\/(src|app|lib)\\//",
                     "command": "repoDoc.showModuleDoc",
-                    "group": "navigation"
+                    "group": "navigation@1"
                 }
             ]
         }

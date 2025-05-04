@@ -13,33 +13,66 @@ export function activate(context: vscode.ExtensionContext) {
 	// Регистрируем команду для показа документации модуля
 	let showModuleDoc = vscode.commands.registerCommand('repoDoc.showModuleDoc', async (folder: vscode.Uri) => {
 		try {
-			// Для отладки
-			console.log('Command triggered for folder:', folder?.fsPath);
-
-			// Проверяем, что получили URI папки
 			if (!folder) {
 				vscode.window.showErrorMessage('Не выбрана папка');
 				return;
 			}
 
-			// Находим имя и путь самой папки
 			const folderPath = folder.fsPath;
 			const folderName = path.basename(folderPath);
-
-			// Для отладки
-			console.log('Looking for doc file:', `${folderName}_module.md`, 'in', folderPath);
-
-			// Формируем путь к файлу документации
 			const docFilePath = vscode.Uri.file(path.join(folderPath, `${folderName}_module.md`));
 
 			try {
 				// Проверяем существование файла
-				const stat = await fs.promises.stat(docFilePath.fsPath);
-				console.log('File exists:', stat);
+				await fs.promises.stat(docFilePath.fsPath);
 
-				// Открываем файл в редакторе
-				const doc = await vscode.workspace.openTextDocument(docFilePath);
-				await vscode.window.showTextDocument(doc, { preview: false });
+				// Создаем новую панель для просмотра MD файла
+				const panel = vscode.window.createWebviewPanel(
+					'moduleDocumentation',
+					`Документация: ${folderName}`,
+					vscode.ViewColumn.Beside,
+					{
+						enableScripts: true,
+						localResourceRoots: [vscode.Uri.file(folderPath)]
+					}
+				);
+
+				// Читаем содержимое файла
+				const mdContent = await fs.promises.readFile(docFilePath.fsPath, 'utf-8');
+
+				// Конвертируем Markdown в HTML с улучшенными стилями
+				panel.webview.html = `<!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { 
+                            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                            line-height: 1.5;
+                            padding: 20px;
+                            max-width: 800px;
+                            margin: 0 auto;
+                        }
+                        h1 { color: #2c3e50; border-bottom: 2px solid #eee; }
+                        h2 { color: #34495e; margin-top: 30px; }
+                        h3 { color: #444; }
+                        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; }
+                        code { font-family: 'Consolas', monospace; }
+                        p { color: #333; }
+                    </style>
+                </head>
+                <body>
+                    ${mdContent
+						.replace(/</g, '&lt;')
+						.replace(/>/g, '&gt;')
+						.replace(/^### (.*$)/gm, '<h3>$1</h3>')
+						.replace(/^## (.*$)/gm, '<h2>$1</h2>')
+						.replace(/^# (.*$)/gm, '<h1>$1</h1>')
+						.replace(/\n\n/g, '</p><p>')
+						.replace(/`([^`]+)`/g, '<code>$1</code>')}
+                </body>
+                </html>`;
+
 			} catch (error) {
 				console.error('Error accessing file:', error);
 				vscode.window.showErrorMessage(`Документация для модуля ${folderName} не найдена (${folderName}_module.md)`);
