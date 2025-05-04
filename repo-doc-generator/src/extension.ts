@@ -13,24 +13,39 @@ export function activate(context: vscode.ExtensionContext) {
 	// Регистрируем команду для показа документации модуля
 	let showModuleDoc = vscode.commands.registerCommand('repoDoc.showModuleDoc', async (folder: vscode.Uri) => {
 		try {
+			// Для отладки
+			console.log('Command triggered for folder:', folder?.fsPath);
+
+			// Проверяем, что получили URI папки
+			if (!folder) {
+				vscode.window.showErrorMessage('Не выбрана папка');
+				return;
+			}
+
 			// Находим имя и путь самой папки
 			const folderPath = folder.fsPath;
 			const folderName = path.basename(folderPath);
 
-			// Формируем путь к файлу документации - в той же папке
+			// Для отладки
+			console.log('Looking for doc file:', `${folderName}_module.md`, 'in', folderPath);
+
+			// Формируем путь к файлу документации
 			const docFilePath = vscode.Uri.file(path.join(folderPath, `${folderName}_module.md`));
 
 			try {
 				// Проверяем существование файла
-				await fs.promises.access(docFilePath.fsPath);
+				const stat = await fs.promises.stat(docFilePath.fsPath);
+				console.log('File exists:', stat);
 
 				// Открываем файл в редакторе
 				const doc = await vscode.workspace.openTextDocument(docFilePath);
-				await vscode.window.showTextDocument(doc);
+				await vscode.window.showTextDocument(doc, { preview: false });
 			} catch (error) {
-				vscode.window.showErrorMessage(`Документация для модуля ${folderName} не найдена (${folderName}.md)`);
+				console.error('Error accessing file:', error);
+				vscode.window.showErrorMessage(`Документация для модуля ${folderName} не найдена (${folderName}_module.md)`);
 			}
 		} catch (error) {
+			console.error('Command error:', error);
 			vscode.window.showErrorMessage('Ошибка при открытии документации модуля');
 		}
 	});
@@ -145,69 +160,73 @@ class RepoDocSidebarProvider {
 		}
 		const root = folders[0].uri.fsPath;
 
-		const zip = new JSZip();
-		await addFolderToZip(zip, root, '');
-		const zipBuffer = await zip.generateAsync({ type: "arraybuffer" });
+		// Создаем временную папку рядом с проектом
+		const tempDir = path.join(root, '.vscode-temp');
 
 		try {
+			// Проверяем существование временной папки
+			if (fs.existsSync(tempDir)) {
+				this._view.webview.postMessage({ status: 'Используем существующую документацию...' });
+				const extractedMdPath = path.join(tempDir, 'content/generated_docs/auctioning_platform/project_overview.md');
+
+				if (fs.existsSync(extractedMdPath)) {
+					const mdContent = await fs.promises.readFile(extractedMdPath, 'utf-8');
+					// Конвертируем Markdown в HTML
+					const htmlContent = mdContent
+						.replace(/\n/g, '<br>')
+						.replace(/#{3,}\s(.+)/g, '<h3>$1</h3>')
+						.replace(/#{2}\s(.+)/g, '<h2>$1</h2>')
+						.replace(/#\s(.+)/g, '<h1>$1</h1>');
+
+					this._view.webview.postMessage({
+						status: 'Анализ завершён',
+						data: `<div class="markdown-body">${htmlContent}</div>`
+					});
+					return;
+				}
+			}
+
+			// Если папки нет или файла в ней нет - создаём папку и делаем запрос
+			if (!fs.existsSync(tempDir)) {
+				await fs.promises.mkdir(tempDir, { recursive: true });
+			}
+
+			// Архивируем и отправляем на сервер
+			const zip = new JSZip();
+			await addFolderToZip(zip, root, '');
+			const zipBuffer = await zip.generateAsync({ type: "arraybuffer" });
+
 			this._view.webview.postMessage({ status: 'Отправка на сервер...' });
 			const resp = await axios.post(
 				'http://localhost:8000/components/upload_and_extract/',
 				zipBuffer,
 				{
 					headers: { 'Content-Type': 'application/zip' },
-					responseType: 'arraybuffer'  // Изменено на arraybuffer для получения ZIP
+					responseType: 'arraybuffer'
 				}
 			);
 
-			console.log('Получен ответ от сервера:', {
-				status: resp.status,
-				headers: resp.headers,
-				dataLength: resp.data.byteLength
-			});
-
-			// Распаковываем полученный ZIP
+			// Распаковываем полученный ZIP в папку
 			const receivedZip = await JSZip.loadAsync(resp.data);
+			this._view.webview.postMessage({ status: 'Распаковка архива...' });
 
-			// Создаём/получаем output channel
-			const outputChannel = vscode.window.createOutputChannel('Repo Doc Generator');
-
-			// Выводим список всех файлов в ZIP
-			outputChannel.appendLine('Содержимое полученного ZIP архива:');
-			receivedZip.forEach((relativePath, entry) => {
-				outputChannel.appendLine(`- ${relativePath} (${entry.name})`);
-			});
-
-			// Показываем панель
-			// outputChannel.show();
-
-			// Пробуем найти файл разными способами
-			let directPath = '';
-			Object.keys(receivedZip.files).forEach(filePath => {
-				if (filePath.endsWith('project_overview.md')) {
-					directPath = filePath;
+			// Извлекаем все файлы
+			for (const [filename, file] of Object.entries(receivedZip.files)) {
+				if (file.dir) {
+					await fs.promises.mkdir(path.join(tempDir, filename), { recursive: true });
+				} else {
+					const content = await file.async('nodebuffer');
+					const filePath = path.join(tempDir, filename);
+					await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+					await fs.promises.writeFile(filePath, content);
 				}
-			});
-			if (!directPath) {
-				this._view.webview.postMessage({
-					status: 'Ошибка',
-					data: '<p style="color: red;">Файл project_overview.md не найден в ZIP архиве</p>'
-				});
-				return;
 			}
-			const overviewFile = receivedZip.file(directPath);
 
-			console.log('Поиск файла:', {
-				directPathExists: !!overviewFile,
-				totalFiles: Object.keys(receivedZip.files).length,
-				filesWithMd: Object.keys(receivedZip.files).filter(f => f.endsWith('.md'))
-			});
-
-			if (overviewFile) {
-				const content = await overviewFile.async('string');
-				console.log('Содержимое файла (первые 100 символов):', content.substring(0, 100));
-				// Конвертируем Markdown в HTML (простая замена)
-				const htmlContent = content
+			// После распаковки читаем файл и отображаем
+			const extractedMdPath = path.join(tempDir, 'content/generated_docs/auctioning_platform/project_overview.md');
+			if (fs.existsSync(extractedMdPath)) {
+				const mdContent = await fs.promises.readFile(extractedMdPath, 'utf-8');
+				const htmlContent = mdContent
 					.replace(/\n/g, '<br>')
 					.replace(/#{3,}\s(.+)/g, '<h3>$1</h3>')
 					.replace(/#{2}\s(.+)/g, '<h2>$1</h2>')
@@ -218,11 +237,9 @@ class RepoDocSidebarProvider {
 					data: `<div class="markdown-body">${htmlContent}</div>`
 				});
 			} else {
-				this._view.webview.postMessage({
-					status: 'Ошибка',
-					data: '<p style="color: red;">Файл project_overview.md не найден в ответе сервера</p>'
-				});
+				throw new Error('Файл не найден после распаковки');
 			}
+
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
 			this._view.webview.postMessage({

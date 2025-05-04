@@ -33,21 +33,21 @@
                 }
             ]
         },
-        "menus": {
-            "explorer/context": [
-                {
-                    "when": "explorerResourceIsFolder",
-                    "command": "repoDoc.showModuleDoc",
-                    "group": "navigation"
-                }
-            ]
-        },
         "commands": [
             {
                 "command": "repoDoc.showModuleDoc",
                 "title": "Показать документацию модуля"
             }
-        ]
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "when": "explorerResourceIsFolder && !resourcePath =~ /\\.vscode-temp/",
+                    "command": "repoDoc.showModuleDoc",
+                    "group": "navigation"
+                }
+            ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
