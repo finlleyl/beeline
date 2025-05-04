@@ -2,7 +2,7 @@ import tempfile
 import zipfile
 import aiofiles
 from fastapi import APIRouter, Body, File, HTTPException, Query, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from pathlib import Path
 import httpx
 
@@ -13,34 +13,24 @@ router = APIRouter(prefix="/components", tags=["components"])
 @router.post("/upload_and_extract/")
 async def upload_and_extract(
     zip_file: bytes = Body(..., media_type="application/zip")
-) -> JSONResponse:
+) -> FileResponse:
     """
     Получаем ZIP в теле запроса (Content-Type: application/zip),
-    сохраняем, распаковываем и возвращаем путь.
+    и возвращаем docs_upd.zip из корня проекта
     """
     try:
-        tmp = Path(tempfile.gettempdir())
-        zip_path = tmp / "upload.zip"
+        # Путь к ZIP-файлу в корне проекта
+        zip_path = Path(__file__).parent.parent.parent.parent.parent / "docs_upd.zip"
 
-        # Сохраняем файл
-        async with aiofiles.open(zip_path, "wb") as f:
-            await f.write(zip_file)
+        if not zip_path.exists():
+            raise HTTPException(status_code=404, detail="docs_upd.zip не найден")
 
-        # Создаём папку для распаковки
-        extract_dir = tmp / "repo_upload"
-        extract_dir.mkdir(exist_ok=True)
+        return FileResponse(
+            path=zip_path, filename="docs_upd.zip", media_type="application/zip"
+        )
 
-        # Распаковываем
-        with zipfile.ZipFile(zip_path, "r") as z:
-            z.extractall(extract_dir)
-
-        return JSONResponse({"extracted_to": str(extract_dir)})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-    
-
 
 
 # @router.post("/download_and_extract/")

@@ -34,9 +34,6 @@
             ]
         }
     },
-    "activationEvents": [
-        "onView:repoDocView"
-    ],
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p .",

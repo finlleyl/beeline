@@ -157,18 +157,37 @@ class RepoDocSidebarProvider {
                 this._view.webview.postMessage({ status: 'Отправка на сервер...' });
                 const resp = yield axios_1.default.post('http://localhost:8000/components/upload_and_extract/', zipBuffer, {
                     headers: { 'Content-Type': 'application/zip' },
-                    responseType: 'json' // ожидаем JSON с путём
+                    responseType: 'arraybuffer' // Изменено на arraybuffer для получения ZIP
                 });
-                this._view.webview.postMessage({
-                    status: 'Анализ завершён',
-                    data: resp.data
-                });
+                // Распаковываем полученный ZIP
+                const receivedZip = yield jszip_1.default.loadAsync(resp.data);
+                // Изменяем путь к файлу project_overview.md
+                const overviewFile = receivedZip.file('content/generated_docs/auctioning_platform/project_overview.md');
+                if (overviewFile) {
+                    const content = yield overviewFile.async('string');
+                    // Конвертируем Markdown в HTML (простая замена)
+                    const htmlContent = content
+                        .replace(/\n/g, '<br>')
+                        .replace(/#{3,}\s(.+)/g, '<h3>$1</h3>')
+                        .replace(/#{2}\s(.+)/g, '<h2>$1</h2>')
+                        .replace(/#\s(.+)/g, '<h1>$1</h1>');
+                    this._view.webview.postMessage({
+                        status: 'Анализ завершён',
+                        data: `<div class="markdown-body">${htmlContent}</div>`
+                    });
+                }
+                else {
+                    this._view.webview.postMessage({
+                        status: 'Ошибка',
+                        data: '<p style="color: red;">Файл project_overview.md не найден в ответе сервера</p>'
+                    });
+                }
             }
             catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
                 this._view.webview.postMessage({
                     status: 'Ошибка: ' + errorMessage,
-                    data: '<p style="color: red;">Произошла ошибка при обработке запроса</p>'
+                    data: '<p style="color: red;">Произошла ошибка при обработке ответа</p>'
                 });
             }
         });
