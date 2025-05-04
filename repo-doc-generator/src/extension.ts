@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 				const folderPath = folder.fsPath;
 				const folderName = path.basename(folderPath);
 				const relPath = path.relative(workspaceRoot, folderPath);
-				
+
 				const docFilePath = vscode.Uri.file(
 					path.join(workspaceRoot, '.vscode-temp', 'content', 'generated_docs', relPath, `${folderName}_module.md`)
 				);
@@ -107,7 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
 			.replace(/^## (.*$)/gm, '<h2>$1</h2>')
 			.replace(/^# (.*$)/gm, '<h1>$1</h1>')
 			// Code blocks
-			.replace(/```(\w*)\n([\s\S]*?)```/gm, (_, lang, code) => 
+			.replace(/```(\w*)\n([\s\S]*?)```/gm, (_, lang, code) =>
 				`<pre><code class="language-${lang}">${code.trim()}</code></pre>`)
 			// Inline code
 			.replace(/`([^`]+)`/g, '<code>$1</code>')
@@ -127,6 +127,91 @@ export function activate(context: vscode.ExtensionContext) {
 			.replace(/^(.+)$/gm, '$1<br>');
 	}
 
+	// Создаем декоратор с улучшенными стилями
+	const decorationType = vscode.window.createTextEditorDecorationType({
+		isWholeLine: true,
+		before: {
+			contentText: '',
+			backgroundColor: new vscode.ThemeColor('editor.background'),
+			color: new vscode.ThemeColor('editor.foreground'),
+			fontStyle: 'normal',
+			margin: '1em 0',
+			width: '100%',
+			height: 'auto'
+		}
+	});
+
+	// Функция для обновления документации
+	async function updateDocumentation(editor: vscode.TextEditor) {
+		try {
+			// 1. Путь к открытому файлу и корню рабочего пространства
+			const filePath = editor.document.uri.fsPath;
+			const workspaceFolders = vscode.workspace.workspaceFolders;
+			if (!workspaceFolders || workspaceFolders.length === 0) {
+				vscode.window.showErrorMessage('Нет открытого рабочего пространства');
+				return;
+			}
+			const workspaceRoot = workspaceFolders[0].uri.fsPath;
+
+			// 2. Директория и базовое имя файла
+			const fileDir = path.dirname(filePath);
+			const fileName = path.basename(filePath);
+			const baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+
+			// 3. Относительный путь от корня до папки с файлом
+			const relDir = path.relative(workspaceRoot, fileDir);
+
+			// 4. Формируем путь в .vscode-temp/content/generated_docs
+			const docDir = path.join(
+				workspaceRoot,
+				'.vscode-temp',
+				'content',
+				'generated_docs',
+				relDir
+			);
+			const docPath = path.join(docDir, `${baseName}.md`);
+
+			// 5. Проверяем существование и читаем содержимое
+			if (fs.existsSync(docPath)) {
+				const docContent = await fs.promises.readFile(docPath, 'utf-8');
+
+				const decoration: vscode.DecorationOptions = {
+					range: new vscode.Range(0, 0, 0, 0),
+					renderOptions: {
+						before: {
+							contentText: docContent,
+							backgroundColor: new vscode.ThemeColor('editor.background'),
+							color: new vscode.ThemeColor('editor.foreground'),
+							fontStyle: 'normal',
+							margin: '1em 0'
+						}
+					}
+				};
+
+				editor.setDecorations(decorationType, [decoration]);
+			} else {
+				editor.setDecorations(decorationType, []);
+			}
+		} catch (error) {
+			console.error('Error updating documentation:', error);
+			vscode.window.showErrorMessage('Ошибка при обновлении документации');
+		}
+	}
+
+	// Слушаем открытие и изменение активного редактора
+	context.subscriptions.push(
+		vscode.window.onDidChangeActiveTextEditor(editor => {
+			if (editor) {
+				console.log('Editor changed:', editor.document.uri.fsPath);
+				updateDocumentation(editor);
+			}
+		})
+	);
+
+	// Обновляем документацию для уже открытого редактора
+	if (vscode.window.activeTextEditor) {
+		updateDocumentation(vscode.window.activeTextEditor);
+	}
 
 	context.subscriptions.push(showModuleDoc);
 }

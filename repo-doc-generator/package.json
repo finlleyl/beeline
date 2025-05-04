@@ -11,7 +11,8 @@
     ],
     "activationEvents": [
         "onStartupFinished",
-        "onView:repoDocView"
+        "onView:repoDocView",
+        "onLanguage:*"
     ],
     "main": "./out/extension.js",
     "contributes": {
