@@ -1,0 +1,54 @@
+{
+    "name": "repo-doc-generator",
+    "displayName": "Repository Documentation Generator",
+    "description": "Сжимает открытый репозиторий, отправляет его на сервер и показывает документацию во вкладке Activity Bar.",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.60.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onStartupFinished",
+        "onView:repoDocView"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "repoDocContainer",
+                    "title": "Repo Docs",
+                    "icon": "resources/icon.svg"
+                }
+            ]
+        },
+        "views": {
+            "repoDocContainer": [
+                {
+                    "id": "repoDocView",
+                    "name": "Анализ репозитория",
+                    "type": "webview"
+                }
+            ]
+        }
+    },
+    "activationEvents": [
+        "onView:repoDocView"
+    ],
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p .",
+        "watch": "tsc -watch -p ."
+    },
+    "devDependencies": {
+        "typescript": "^4.4.3",
+        "vscode": "^1.1.37",
+        "@types/node": "^14.14.37"
+    },
+    "dependencies": {
+        "jszip": "^3.7.1",
+        "axios": "^0.21.1"
+    }
+}

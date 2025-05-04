@@ -7,14 +7,14 @@ from typing import List, Dict
 
 def parse_python(path: Path) -> List[Dict]:
 
-    source = path.read_text(encoding='utf-8')
-    uri    = path.as_uri()
+    source = path.read_text(encoding="utf-8")
+    uri = path.as_uri()
 
     comment_map: Dict[int, str] = {}
     for tok in tokenize.generate_tokens(io.StringIO(source).readline):
         if tok.type == tokenize.COMMENT:
             ln = tok.start[0]
-            txt = tok.string.lstrip('#').strip()
+            txt = tok.string.lstrip("#").strip()
             comment_map.setdefault(ln, []).append(txt)
 
     entities: List[Dict] = []
@@ -35,7 +35,7 @@ def parse_python(path: Path) -> List[Dict]:
                     base.id if isinstance(base, ast.Name) else ast.unparse(base)
                     for base in node.bases
                 ],
-                "relations": {"methods": [], "calls": [], "called_by": []}
+                "relations": {"methods": [], "calls": [], "called_by": []},
             }
             prev = self.current_entity
             self.current_entity = entity
@@ -60,7 +60,7 @@ def parse_python(path: Path) -> List[Dict]:
                 "type": ent_type,
                 "file": uri,
                 "inherits": [],
-                "relations": {"calls": [], "called_by": []}
+                "relations": {"calls": [], "called_by": []},
             }
             self.entities.append(entity)
             prev = self.current_entity
@@ -84,4 +84,5 @@ def parse_python(path: Path) -> List[Dict]:
 
     return entities
 
-result = parse_python(Path("foo.py").resolve())
+
+result = parse_python(Path("parsers/pyparser.py").resolve())
