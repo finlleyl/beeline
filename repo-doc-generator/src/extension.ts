@@ -20,38 +20,25 @@ export function activate(context: vscode.ExtensionContext) {
 					return;
 				}
 
-				// 1. Корень рабочего пространства
 				const workspaceFolders = vscode.workspace.workspaceFolders;
-				if (!workspaceFolders || workspaceFolders.length === 0) {
+				if (!workspaceFolders?.length) {
 					vscode.window.showErrorMessage('Нет открытого рабочего пространства');
 					return;
 				}
-				const workspaceRoot = workspaceFolders[0].uri.fsPath;
 
-				// 2. Абсолютный путь к выбранной папке и её имя
+				const workspaceRoot = workspaceFolders[0].uri.fsPath;
 				const folderPath = folder.fsPath;
 				const folderName = path.basename(folderPath);
-
-				// 3. Относительный путь внутри репозитория
 				const relPath = path.relative(workspaceRoot, folderPath);
-
-				// 4. Собираем путь к файлу в .vscode-temp/content/generated_docs
+				
 				const docFilePath = vscode.Uri.file(
-					path.join(
-						workspaceRoot,
-						'.vscode-temp',
-						'content',
-						'generated_docs',
-						relPath,
-						`${folderName}_module.md`
-					)
+					path.join(workspaceRoot, '.vscode-temp', 'content', 'generated_docs', relPath, `${folderName}_module.md`)
 				);
 
 				try {
-					// Проверяем, что файл существует
 					await fs.promises.stat(docFilePath.fsPath);
+					const mdContent = await fs.promises.readFile(docFilePath.fsPath, 'utf-8');
 
-					// Открываем Webview для просмотра документации
 					const panel = vscode.window.createWebviewPanel(
 						'moduleDocumentation',
 						`Документация: ${folderName}`,
@@ -62,32 +49,47 @@ export function activate(context: vscode.ExtensionContext) {
 						}
 					);
 
-					// Читаем и рендерим Markdown
-					const mdContent = await fs.promises.readFile(docFilePath.fsPath, 'utf-8');
 					panel.webview.html = `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"/><style>
-  body { font-family: sans-serif; padding:20px; max-width:800px; margin:auto; }
-  h1 { border-bottom:2px solid #ddd; }
-  h2 { margin-top:1em; }
-  pre { background:#f5f5f5; padding:10px; border-radius:4px; }
-  code { background:#eee; padding:2px 4px; border-radius:3px; }
-</style></head>
-<body>
-  ${mdContent
-							.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-							.replace(/^### (.*$)/gm, '<h3>$1</h3>')
-							.replace(/^## (.*$)/gm, '<h2>$1</h2>')
-							.replace(/^# (.*$)/gm, '<h1>$1</h1>')
-							.replace(/\n\n/g, '</p><p>')
-							.replace(/`([^`]+)`/g, '<code>$1</code>')}
-</body>
-</html>`;
+					<html>
+					<head>
+						<meta charset="UTF-8"/>
+						<style>
+							body {
+								font-family: system-ui, -apple-system, sans-serif;
+								line-height: 1.6;
+								padding: 20px;
+								max-width: 900px;
+								margin: auto;
+								color: var(--vscode-editor-foreground);
+								background: var(--vscode-editor-background);
+							}
+							h1, h2, h3 { margin-top: 1.5em; }
+							pre {
+								background: var(--vscode-textBlockQuote-background);
+								padding: 16px;
+								border-radius: 6px;
+								overflow: auto;
+							}
+							code {
+								font-family: var(--vscode-editor-font-family);
+								font-size: 85%;
+							}
+							blockquote {
+								border-left: 4px solid var(--vscode-textBlockQuote-border);
+								margin: 0;
+								padding-left: 1em;
+								opacity: 0.8;
+							}
+						</style>
+					</head>
+					<body>
+						${parseMarkdown(mdContent)}
+					</body>
+					</html>`;
+
 				} catch (err) {
 					console.error('Error accessing file:', err);
-					vscode.window.showErrorMessage(
-						`Документация не найдена: ${docFilePath.fsPath}`
-					);
+					vscode.window.showErrorMessage(`Документация не найдена: ${docFilePath.fsPath}`);
 				}
 			} catch (error) {
 				console.error('Command error:', error);
@@ -95,6 +97,35 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}
 	);
+
+	function parseMarkdown(markdown: string): string {
+		return markdown
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			// Headers
+			.replace(/^### (.*$)/gm, '<h3>$1</h3>')
+			.replace(/^## (.*$)/gm, '<h2>$1</h2>')
+			.replace(/^# (.*$)/gm, '<h1>$1</h1>')
+			// Code blocks
+			.replace(/```(\w*)\n([\s\S]*?)```/gm, (_, lang, code) => 
+				`<pre><code class="language-${lang}">${code.trim()}</code></pre>`)
+			// Inline code
+			.replace(/`([^`]+)`/g, '<code>$1</code>')
+			// Bold and italic
+			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+			.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+			// Lists
+			.replace(/^- (.*$)/gm, '<li>$1</li>')
+			.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+			// Links and images
+			.replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">')
+			.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+			// Blockquotes
+			.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+			// Paragraphs
+			.replace(/\n\n/g, '</p><p>')
+			.replace(/^(.+)$/gm, '$1<br>');
+	}
 
 
 	context.subscriptions.push(showModuleDoc);
