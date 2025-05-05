@@ -12,6 +12,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Добавляем хранение состояния
 	let isDocumentationEnabled = context.globalState.get('isDocumentationEnabled', true);
+	// Обновляем начальное состояние в контексте
+	vscode.commands.executeCommand('setContext', 'repoDoc.documentationEnabled', isDocumentationEnabled);
 
 	// Создаем команду для переключения состояния
 	let toggleDoc = vscode.commands.registerCommand('repoDoc.toggleDocumentation', () => {
@@ -23,6 +25,11 @@ export function activate(context: vscode.ExtensionContext) {
 		const status = isDocumentationEnabled ? 'включен' : 'выключен';
 		vscode.commands.executeCommand('setContext', 'repoDoc.documentationEnabled', isDocumentationEnabled);
 		vscode.window.showInformationMessage(`Автопоказ документации ${status}`);
+
+		// Уведомляем webview об изменении состояния
+		if (provider._view) {
+			provider._view.webview.postMessage({ docEnabled: isDocumentationEnabled });
+		}
 
 		// Обновляем текущий файл
 		if (vscode.window.activeTextEditor) {
@@ -294,7 +301,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 class RepoDocSidebarProvider {
-	private _view?: any;
+	public _view?: any; // Changed to public to access from outside
 
 	constructor(private readonly _context: vscode.ExtensionContext) { }
 
@@ -302,6 +309,11 @@ class RepoDocSidebarProvider {
 	public resolveWebviewView(webviewView: any, _ctx: any, _token: vscode.CancellationToken) {
 		this._view = webviewView;
 		webviewView.webview.options = { enableScripts: true };
+
+		// Отправляем начальное состояние в webview
+		const isDocumentationEnabled = this._context.globalState.get('isDocumentationEnabled', true);
+		webviewView.webview.postMessage({ docEnabled: isDocumentationEnabled });
+
 		webviewView.webview.html = this.getHtml();
 
 		// Слушаем сообщения из Webview (только 'analyze')
