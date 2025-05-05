@@ -1,3 +1,4 @@
+import shutil
 import tempfile
 import zipfile
 import aiofiles
@@ -5,6 +6,8 @@ from fastapi import APIRouter, Body, File, HTTPException, Query, UploadFile
 from fastapi.responses import JSONResponse, FileResponse
 from pathlib import Path
 import httpx
+
+from llm.generate import generate_docs, generate_module_docs, generate_overview_docs, zip_docs
 
 
 router = APIRouter(prefix="/components", tags=["components"])
@@ -19,14 +22,26 @@ async def upload_and_extract(
     и возвращаем docs_upd.zip из корня проекта
     """
     try:
+        # Очищаем папку content перед обработкой
+        content_dir = Path(__file__).parent.parent.parent.parent.parent / "content"
+        if content_dir.exists():
+            shutil.rmtree(content_dir)
+        content_dir.mkdir()
         # Путь к ZIP-файлу в корне проекта
-        zip_path = Path(__file__).parent.parent.parent.parent.parent / "docs_upd.zip"
+        # zip_path = Path(__file__).parent.parent.parent.parent.parent / "docs_upd.zip"
+        generate_docs(zip_file)
 
-        if not zip_path.exists():
+        generate_module_docs()
+
+        generate_overview_docs()
+
+        filepath = zip_docs()
+
+        if not filepath.exists():
             raise HTTPException(status_code=404, detail="docs_upd.zip не найден")
 
         return FileResponse(
-            path=zip_path, filename="docs_upd.zip", media_type="application/zip"
+            path=filepath, filename="docs_upd.zip", media_type="application/zip"
         )
 
     except Exception as e:

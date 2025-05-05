@@ -1,5 +1,5 @@
 uvicorn:
-			uvicorn visualization.backend.main:app --reload
+			uvicorn visualization.backend.main:app
 
 
 streamlit:

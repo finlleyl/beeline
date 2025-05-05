@@ -79,7 +79,7 @@ function activate(context) {
             const folderPath = folder.fsPath;
             const folderName = path.basename(folderPath);
             const relPath = path.relative(workspaceRoot, folderPath);
-            const docFilePath = vscode.Uri.file(path.join(workspaceRoot, '.vscode-temp', 'content', 'generated_docs', relPath, `${folderName}_module.md`));
+            const docFilePath = vscode.Uri.file(path.join(workspaceRoot, '.vscode-temp', relPath, `${folderName}_module.md`));
             try {
                 yield fs.promises.stat(docFilePath.fsPath);
                 const mdContent = yield fs.promises.readFile(docFilePath.fsPath, 'utf-8');
@@ -223,10 +223,19 @@ function activate(context) {
                 if (fs.existsSync(docPath)) {
                     const docContent = yield fs.promises.readFile(docPath, 'utf-8');
                     const formattedContent = formatMarkdownContent(docContent);
-                    // Создаем новую веб-панель для документации
-                    const panel = vscode.window.createWebviewPanel('fileDocumentation', `Документация: ${baseName}`, vscode.ViewColumn.Beside, {
+                    // Создаем новую веб-панель для документации с preserveFocus: true
+                    const panel = vscode.window.createWebviewPanel('fileDocumentation', `Документация: ${baseName}`, {
+                        viewColumn: vscode.ViewColumn.Beside,
+                        preserveFocus: true // Добавляем этот параметр
+                    }, {
                         enableScripts: true,
                         retainContextWhenHidden: true
+                    });
+                    // После создания панели возвращаем фокус на редактор
+                    yield vscode.window.showTextDocument(editor.document, {
+                        viewColumn: editor.viewColumn,
+                        preserveFocus: false,
+                        preview: false
                     });
                     panel.webview.html = `<!DOCTYPE html>
 				<html>
@@ -456,7 +465,7 @@ class RepoDocSidebarProvider {
                     }
                 }
                 // После распаковки читаем файл и отображаем
-                const extractedMdPath = path.join(tempDir, 'content/generated_docs/auctioning_platform/project_overview.md');
+                const extractedMdPath = path.join(tempDir, 'project_overview.md');
                 if (fs.existsSync(extractedMdPath)) {
                     const mdContent = yield fs.promises.readFile(extractedMdPath, 'utf-8');
                     const htmlContent = mdContent

@@ -11,8 +11,7 @@
     ],
     "activationEvents": [
         "onStartupFinished",
-        "onView:repoDocView",
-        "onLanguage:*"
+        "onView:repoDocView"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -39,12 +38,6 @@
                 "command": "repoDoc.showModuleDoc",
                 "title": "Показать документацию модуля",
                 "category": "Repository Docs"
-            },
-            {
-                "command": "repoDoc.toggleDocumentation",
-                "title": "Включить/выключить автопоказ документации",
-                "category": "Repository Docs",
-                "icon": "$(eye)"
             }
         ],
         "menus": {
@@ -53,13 +46,6 @@
                     "when": "explorerResourceIsFolder && !resourcePath =~ /\\.vscode-temp/ && explorerResourceRoot =~ /\\/(src|app|lib)\\//",
                     "command": "repoDoc.showModuleDoc",
                     "group": "navigation@1"
-                }
-            ],
-            "view/title": [
-                {
-                    "command": "repoDoc.toggleDocumentation",
-                    "when": "view == repoDocView",
-                    "group": "navigation"
                 }
             ]
         }

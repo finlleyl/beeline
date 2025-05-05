@@ -54,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
 				const relPath = path.relative(workspaceRoot, folderPath);
 
 				const docFilePath = vscode.Uri.file(
-					path.join(workspaceRoot, '.vscode-temp', 'content', 'generated_docs', relPath, `${folderName}_module.md`)
+					path.join(workspaceRoot, '.vscode-temp', relPath, `${folderName}_module.md`)
 				);
 
 				try {
@@ -215,16 +215,26 @@ export function activate(context: vscode.ExtensionContext) {
 				const docContent = await fs.promises.readFile(docPath, 'utf-8');
 				const formattedContent = formatMarkdownContent(docContent);
 
-				// Создаем новую веб-панель для документации
+				// Создаем новую веб-панель для документации с preserveFocus: true
 				const panel = vscode.window.createWebviewPanel(
 					'fileDocumentation',
 					`Документация: ${baseName}`,
-					vscode.ViewColumn.Beside,
+					{
+						viewColumn: vscode.ViewColumn.Beside,
+						preserveFocus: true  // Добавляем этот параметр
+					},
 					{
 						enableScripts: true,
 						retainContextWhenHidden: true
 					}
 				);
+
+				// После создания панели возвращаем фокус на редактор
+				await vscode.window.showTextDocument(editor.document, {
+					viewColumn: editor.viewColumn,
+					preserveFocus: false,
+					preview: false
+				});
 
 				panel.webview.html = `<!DOCTYPE html>
 				<html>
@@ -474,7 +484,7 @@ class RepoDocSidebarProvider {
 			}
 
 			// После распаковки читаем файл и отображаем
-			const extractedMdPath = path.join(tempDir, 'content/generated_docs/auctioning_platform/project_overview.md');
+			const extractedMdPath = path.join(tempDir, 'project_overview.md');
 			if (fs.existsSync(extractedMdPath)) {
 				const mdContent = await fs.promises.readFile(extractedMdPath, 'utf-8');
 				const htmlContent = mdContent
