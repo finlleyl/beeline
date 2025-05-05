@@ -1,9 +1,34 @@
 import streamlit as st
 import requests
 from st_link_analysis import st_link_analysis, NodeStyle, EdgeStyle
+from pydantic import BaseModel
+from typing import Optional
 
 st.set_page_config(page_title="CoSE-раскладка графа", layout="wide")
 st.title("📊 Демонстрация CoSE-раскладки Cytoscape.js")
+
+# Модель для запроса анализа функции
+class FunctionAnalysisRequest(BaseModel):
+    file_path: str
+    start_line: int
+    end_line: int
+
+# Функция для отправки запроса на анализ
+def analyze_function(file_path: str, start_line: int, end_line: int) -> Optional[str]:
+    try:
+        response = requests.post(
+            "http://localhost:8000/git-analysis/analyze-function",
+            json={
+                "file_path": file_path,
+                "start_line": start_line,
+                "end_line": end_line
+            }
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        st.error(f"Ошибка при анализе функции: {str(e)}")
+        return None
 
 # Примерная структура
 example_elements = {
@@ -46,6 +71,21 @@ cose_layout = {
     "randomize": False,
     "componentSpacing": 40,
 }
+
+# Добавляем контекстное меню для анализа функции
+st.sidebar.title("Анализ функции")
+selected_file = st.sidebar.text_input("Путь к файлу")
+start_line = st.sidebar.number_input("Начальная строка", min_value=1, value=1)
+end_line = st.sidebar.number_input("Конечная строка", min_value=1, value=1)
+
+if st.sidebar.button("Проанализировать функцию"):
+    if selected_file and start_line and end_line:
+        result = analyze_function(selected_file, start_line, end_line)
+        if result:
+            st.sidebar.success("Анализ завершен")
+            st.sidebar.json(result)
+    else:
+        st.sidebar.error("Пожалуйста, заполните все поля")
 
 # Визуализация
 st_link_analysis(

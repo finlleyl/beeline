@@ -278,9 +278,9 @@ def generate_answer_for_git(prompt: str) -> str:
         "modelUri": MODEL_URI,
         "completionOptions": {"stream": False, "temperature": 0.2, "maxTokens": 1200},
         "messages": [
-            {"role": "system", "text": "Ты — старший инженер проекта и на основе исторических данных и списка совместно меняющихся файлов "}
+            {"role": "system", "text": "Ты — старший инженер проекта и на основе исторических данных и списка совместно меняющихся файлов ты анализируешь изменения в кодовой базе."},
             {"role": "user", "text": prompt}
-        ],
+        ]
     }
     HEADERS = headers
     response = requests.post(URL, headers=HEADERS, json=payload, timeout=120)
