@@ -13,8 +13,8 @@ FOLDER_ID = os.getenv("folder")
 URL = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
 
 
-model_uri = f"gpt://{FOLDER_ID}/yandexgpt/latest"
-MODEL_URI = f"gpt://{FOLDER_ID}/yandexgpt/latest"
+model_uri = f"gpt://{FOLDER_ID}/yandexgpt-32k/latest"
+MODEL_URI = f"gpt://{FOLDER_ID}/yandexgpt-32k/latest"
 
 
 output_dir = "/content/generated_docs"
@@ -274,3 +274,18 @@ def generate_overview_docs():
     output_path.write_text(overview, encoding="utf-8")
     print(f"✅ Сохранено: {output_path}")
     print("\n---\n", overview[:1000], "\n...")
+
+
+def generate_answer_for_git(prompt: str) -> str:
+    payload = {
+        "modelUri": MODEL_URI,
+        "completionOptions": {"stream": False, "temperature": 0.2, "maxTokens": 1200},
+        "messages": [
+            {"role": "system", "text": "Ты — старший инженер проекта и на основе исторических данных и списка совместно меняющихся файлов "}
+            {"role": "user", "text": prompt}
+        ],
+    }
+    HEADERS = headers
+    response = requests.post(URL, headers=HEADERS, json=payload, timeout=120)
+    response.raise_for_status()
+    return response.json()["result"]["alternatives"][0]["message"]["text"]
