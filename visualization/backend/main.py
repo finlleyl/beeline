@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine
 from visualization.backend.db.database import Base
 from visualization.backend.api.routers.components import router as components_router
+from visualization.backend.api.routers.git_analysis import router as git_analysis_router
 
 
 
@@ -32,3 +33,4 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(components_router)
+app.include_router(git_analysis_router)
