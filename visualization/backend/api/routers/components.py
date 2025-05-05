@@ -43,6 +43,16 @@ async def upload_and_extract(
         return FileResponse(
             path=filepath, filename="docs_upd.zip", media_type="application/zip"
         )
+        
+        
+        # filepath = Path('C:/project/beeline/docs_upd.zip')
+
+        # if not filepath.exists():
+        #     raise HTTPException(status_code=404, detail="docs_upd.zip не найден")
+
+        # return FileResponse(
+        #     path=filepath, filename="docs_upd.zip", media_type="application/zip"
+        # )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -13,8 +13,8 @@ FOLDER_ID = os.getenv("folder")
 URL = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
 
 
-model_uri = f"gpt://{FOLDER_ID}/yandexgpt/latest"
-MODEL_URI = f"gpt://{FOLDER_ID}/yandexgpt/latest"
+model_uri = f"gpt://{FOLDER_ID}/yandexgpt-32k/latest"
+MODEL_URI = f"gpt://{FOLDER_ID}/yandexgpt-32k/latest"
 
 
 output_dir = "/content/generated_docs"
@@ -141,11 +141,10 @@ def generate_docs(zip_file: bytes) -> Path:
 
 def generate_module_docs():
 
-    docs_root = Path("/content/generated_docs/")
+    docs_root = Path("/content/generated_docs")
     HEADERS = headers  # Reuse headers defined above
 
     MAX_CHARS = 10000  # ограничение размера запроса
-
 
     def merge_batch(mod_name: str, files_batch: list[tuple[str, str]]) -> str:
         joined = "\n\n".join(f"### {Path(path).name}\n{text}" for path, text in files_batch)
@@ -168,7 +167,6 @@ def generate_module_docs():
         response.raise_for_status()
         return response.json()["result"]["alternatives"][0]["message"]["text"]
 
-
     def split_into_batches(md_files, max_chars=MAX_CHARS):
         batches, batch, size = [], [], 0
         for f in md_files:
@@ -181,7 +179,6 @@ def generate_module_docs():
         if batch:
             batches.append(batch)
         return batches
-
 
     # Основной цикл с батчами
     for mod_dir in docs_root.iterdir():
